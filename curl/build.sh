@@ -21,8 +21,8 @@ qmstr-cli wait
 echo "master server up and running"
 
 echo $PATH
-cmake ..
-make -j4
+cmake -DOPENSSL_ROOT_DIR=/usr/local/Cellar/openssl/1.0.2l -DOPENSSL_LIBRARIES=/usr/local/Cellar/openssl/1.0.2l/lib ..
+make 
 
 echo "curl built"
 echo "starting analysis"

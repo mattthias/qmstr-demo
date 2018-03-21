@@ -14,7 +14,7 @@ pushd json-c
 git clean -fxd
 
 echo "Waiting for qmstr-master server"
-qmstr-cli wait
+qmstr-cli --cserv qmstr-demo-master:50051 wait
 
 sh autogen.sh
 ./configure
