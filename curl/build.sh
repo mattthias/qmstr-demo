@@ -16,8 +16,9 @@ export CC=$QMSTR_HOME/bin/gcc
 export CXX=$QMSTR_HOME/bin/g++
 export CMAKE_LINKER=gcc
 
-echo "awaiting master server"
-qmstr-cli wait
+echo "Waiting for qmstr-master server to connect in qmstr-demo-master:50051"
+qmstr-cli --cserv qmstr-demo-master:50051 wait
+
 echo "master server up and running"
 
 echo $PATH

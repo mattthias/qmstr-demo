@@ -11,43 +11,64 @@ RUN go get -u github.com/golang/protobuf/protoc-gen-go && \
     go get -u github.com/golang/dep/cmd/dep
 RUN go get -d github.com/QMSTR/qmstr | true
 
-
 RUN cd $GOPATH/src/github.com/QMSTR/qmstr && \
     dep ensure
 RUN go generate github.com/QMSTR/qmstr/cmd/qmstr-wrapper 
 RUN go install github.com/QMSTR/qmstr/cmd/qmstr-wrapper && \
     go install github.com/QMSTR/qmstr/cmd/qmstr-cli
 
-# the runtime stage contains all the elements needed to run the master and the analysis tools:
+
+
+# the runtime stage contains all the elements needed to run the master:
 FROM ubuntu:17.10 as runtime
 
-# install runtime deps
+# install runtime deps 
 RUN apt-get update && \
     apt-get install -y docker.io && \
     rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /go/bin/qmstr-wrapper /usr/local/bin/qmstr-wrapper
-COPY --from=builder /go/bin/qmstr-cli /usr/local/bin/qmstr-cli
+RUN mkdir -p /go/bin
+COPY --from=builder /go/bin/qmstr-wrapper /go/bin/qmstr-wrapper
+COPY --from=builder /go/bin/qmstr-cli /go/bin/qmstr-cli
 
 RUN mkdir -p /QMSTR/bin
-RUN ln -s /usr/local/bin/qmstr-wrapper /QMSTR/bin/gcc
+RUN ln -s /go/bin/qmstr-wrapper /QMSTR/bin/gcc
 
 ENV QMSTR_HOME /QMSTR
 
-# release calc container, based on the runtime stage:
-FROM runtime as demoCalc
-RUN mkdir -p /calc
+COPY docker-entrypoint.sh /docker-entrypoint.sh
 COPY build.inc /build.inc
-COPY calc/build.sh /calc/build.sh
-COPY calc/qmstr.tmpl /calc/qmstr.tmpl
-COPY calc/Calculator /calc/Calculator
-WORKDIR /calc
-CMD [ "/calc/build.sh" ]
+RUN chmod +x /docker-entrypoint.sh
+ENTRYPOINT [ "/docker-entrypoint.sh" ]
 
-# release curl container, based on the runtime stage:
-FROM runtime as demoCurl
-RUN mkdir -p /curl
-COPY build.inc /build.inc
-COPY curl/qmstr.tmpl /curl/qmstr.tmpl
-COPY curl/build.sh /curl/build.sh
-CMD [ "/curl/build.sh" ]
+
+
+
+FROM runtime as dev
+
+ENV GOPATH /go
+ENV PATH ${GOPATH}/bin:/usr/lib/go-1.9/bin:$PATH
+
+# install golang 1.9
+RUN apt-get update && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository ppa:gophers/archive && \
+    apt-get update && \
+    apt-get install -y curl golang-1.9-go autoconf git libio-captureoutput-perl python python-pip protobuf-compiler
+
+EXPOSE 2345
+
+# install go deps
+RUN go get -u github.com/golang/protobuf/protoc-gen-go && \
+    go get github.com/dgraph-io/dgo && \
+    go get -u github.com/derekparker/delve/cmd/dlv && \
+    go get github.com/spf13/pflag
+
+# The $GOROOT/src directory can be passed in as a volume, to allow for testing local changes.
+VOLUME /go/src
+
+ENV QMSTR_DEV ""
+
+COPY dev-entrypoint.sh /dev-entrypoint.sh
+RUN chmod +x /dev-entrypoint.sh
+ENTRYPOINT [ "/dev-entrypoint.sh" ]
