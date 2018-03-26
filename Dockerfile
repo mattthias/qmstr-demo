@@ -36,8 +36,9 @@ RUN ln -s /go/bin/qmstr-wrapper /QMSTR/bin/gcc
 
 ENV QMSTR_HOME /QMSTR
 
-COPY docker-entrypoint.sh /docker-entrypoint.sh
+COPY demos /demos
 COPY build.inc /build.inc
+COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
 
@@ -68,7 +69,7 @@ RUN go get -u github.com/golang/protobuf/protoc-gen-go && \
 VOLUME /go/src
 
 ENV QMSTR_DEV ""
-
+ENV QMSTR_DEMO_DEV true
 COPY dev-entrypoint.sh /dev-entrypoint.sh
 RUN chmod +x /dev-entrypoint.sh
 ENTRYPOINT [ "/dev-entrypoint.sh" ]
