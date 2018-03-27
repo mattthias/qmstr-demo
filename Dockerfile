@@ -36,7 +36,6 @@ RUN ln -s /go/bin/qmstr-wrapper /QMSTR/bin/gcc
 
 ENV QMSTR_HOME /QMSTR
 
-COPY demos /demos
 COPY build.inc /build.inc
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
