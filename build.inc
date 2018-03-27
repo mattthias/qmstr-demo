@@ -15,7 +15,7 @@ function run_qmstr_dev() {
     docker run --name qmstr-demo-master --rm -p 50051:50051 -p 8000:8000 -p 8080:8080 \
         ${QMSTR_DEV:+"-p${QMSTR_DEV}:2345"} ${QMSTR_DEV:+"-eQMSTR_DEV=${QMSTR_DEV}"} \
         ${QMSTR_DEV:+--security-opt seccomp=unconfined} -v "${GOHOSTPATH:-$GOPATH}"/src:/go/src -v \
-        $(pwd):/buildroot --net qmstrnet qmstr/dev
+        "${PWD_DEMO:-$(pwd)}":/buildroot --net qmstrnet qmstr/dev
         
     if [ -n "${QMSTR_DEV}" ]; then
         echo "DEBUGGING: Connect your debugger to port ${QMSTR_DEV}."

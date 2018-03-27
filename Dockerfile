@@ -67,6 +67,8 @@ RUN go get -u github.com/golang/protobuf/protoc-gen-go && \
 # The $GOROOT/src directory can be passed in as a volume, to allow for testing local changes.
 VOLUME /go/src
 
+VOLUME /qmstr-demo/demos
+
 ENV QMSTR_DEV ""
 ENV QMSTR_DEMO_DEV true
 COPY dev-entrypoint.sh /dev-entrypoint.sh
